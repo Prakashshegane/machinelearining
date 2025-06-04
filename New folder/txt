@@ -1,0 +1,394 @@
+Experiment-1 
+ 
+Objective: Solve the Tic-Tac-Toe problem using the Depth First 
+Search technique.  
+ 
+board = ["-", "-", "-", 
+         "-", "-", "-", 
+         "-", "-", "-"]
+
+def print_board(): 
+    print(board[0] + " | " + board[1] + " | " + board[2]) 
+    print(board[3] + " | " + board[4] + " | " + board[5]) 
+    print(board[6] + " | " + board[7] + " | " + board[8]) 
+
+def take_turn(player): 
+    print(player + "'s turn.") 
+    position = input("Choose a position from 1-9: ") 
+    while position not in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]: 
+        position = input("Invalid input. Choose a position from 1-9: ") 
+    position = int(position) - 1 
+    while board[position] != "-": 
+        position = int(input("Position already taken. Choose a different position: ")) - 1 
+    board[position] = player 
+    print_board()
+
+def check_game_over(): 
+    if (board[0] == board[1] == board[2] != "-") or \
+       (board[3] == board[4] == board[5] != "-") or \
+       (board[6] == board[7] == board[8] != "-") or \
+       (board[0] == board[3] == board[6] != "-") or \
+       (board[1] == board[4] == board[7] != "-") or \
+       (board[2] == board[5] == board[8] != "-") or \
+       (board[0] == board[4] == board[8] != "-") or \
+       (board[2] == board[4] == board[6] != "-"): 
+        return "win" 
+    elif "-" not in board: 
+        return "tie" 
+    else: 
+        return "play" 
+
+def play_game(): 
+    print_board() 
+    current_player = "X" 
+    game_over = False 
+    while not game_over: 
+        take_turn(current_player) 
+        game_result = check_game_over() 
+        if game_result == "win": 
+            print(current_player + " wins!") 
+            game_over = True 
+        elif game_result == "tie": 
+            print("It's a tie!") 
+            game_over = True 
+        else: 
+            current_player = "O" if current_player == "X" else "X" 
+
+play_game()
+
+
+
+
+
+Experiment-3 
+Objective: To represent and evaluate different scenarios using 
+predicate logic and knowledge rules. 
+Source Code: 
+from sympy import symbols
+from sympy.logic.boolalg import Implies, And, Not
+from sympy.logic.inference import satisfiable
+
+Professor, Teaches, Researches, Student, Subject = symbols('Professor Teaches Researches Student Subject')
+Alice, Bob, Math, AI = symbols('Alice Bob Math AI')
+
+knowledge_base = [
+    Implies(Professor, Teaches),
+    Implies(Teaches, Subject),
+    Implies(Researches, Professor),
+    Implies(Student, Not(Teaches))
+]
+
+facts = [
+    Researches.subs(Researches, True),
+    Alice == Alice  # placeholder to bind Alice
+]
+
+query = Teaches.subs(Teaches, True)
+
+result = satisfiable(And(*knowledge_base, *facts, query))
+
+print(f"Does Alice teach? {'Yes' if result else 'No'}")
+
+
+
+
+
+
+
+Experiment-4 
+Objective: To apply the Find-S and Candidate Elimination 
+algorithms to a concept learning task and compare their 
+inductive biases and outputs.  
+Source Code: 
+import numpy as np
+
+data = np.array([
+    ['Sunny', 'Warm', 'Normal', 'Strong', 'Warm', 'Same', 'Yes'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Warm', 'Same', 'Yes'],
+    ['Rainy', 'Cold', 'High', 'Strong', 'Warm', 'Change', 'No'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Cool', 'Change', 'Yes']
+])
+
+X = data[:, :-1]
+Y = data[:, -1]
+
+def find_s_algorithm(X, Y):
+    specific_hypothesis = X[0].copy()
+    for i in range(1, len(X)):
+        if Y[i] == 'Yes':
+            for j in range(len(specific_hypothesis)):
+                if X[i][j] != specific_hypothesis[j]:
+                    specific_hypothesis[j] = '?'
+    return specific_hypothesis
+
+def candidate_elimination_algorithm(X, Y):
+    num_attributes = X.shape[1]
+    specific_hypothesis = X[0].copy()
+    general_hypothesis = [['?' for _ in range(num_attributes)]]
+
+    for i in range(len(X)):
+        if Y[i] == 'Yes':
+            for j in range(num_attributes):
+                if specific_hypothesis[j] != X[i][j]:
+                    specific_hypothesis[j] = '?'
+            general_hypothesis = [gh for gh in general_hypothesis if any(
+                gh[k] != specific_hypothesis[k] and gh[k] != '?' for k in range(num_attributes)
+            )]
+        elif Y[i] == 'No':
+            new_general_hypotheses = []
+            for gh in general_hypothesis:
+                for j in range(num_attributes):
+                    if gh[j] == '?':
+                        if specific_hypothesis[j] != '?':
+                            new_hypothesis = gh.copy()
+                            new_hypothesis[j] = specific_hypothesis[j]
+                            new_general_hypotheses.append(new_hypothesis)
+            general_hypothesis.extend(new_general_hypotheses)
+
+    general_hypothesis = [gh for gh in general_hypothesis if any(attr != '?' for attr in gh)]
+    return specific_hypothesis, general_hypothesis
+
+find_s_result = find_s_algorithm(X, Y)
+specific_h, general_h = candidate_elimination_algorithm(X, Y)
+
+print("\nFind-S Hypothesis:", find_s_result)
+print("\nCandidate Elimination Algorithm:")
+print("Most Specific Hypothesis:", specific_h)
+print("Most General Hypotheses:", general_h)
+
+
+
+
+
+
+
+Experiment-5 
+ 
+Objective: To construct a decision tree using the ID3 algorithm 
+on a simple classification dataset. 
+ 
+Source Code: 
+ 
+import numpy as np
+import pandas as pd
+from collections import Counter
+import math
+
+data = pd.DataFrame([
+    ['Sunny', 'Hot', 'High', 'Weak', 'No'],
+    ['Sunny', 'Hot', 'High', 'Strong', 'No'],
+    ['Overcast', 'Hot', 'High', 'Weak', 'Yes'],
+    ['Rain', 'Mild', 'High', 'Weak', 'Yes'],
+    ['Rain', 'Cool', 'Normal', 'Weak', 'Yes'],
+    ['Rain', 'Cool', 'Normal', 'Strong', 'No'],
+    ['Overcast', 'Cool', 'Normal', 'Strong', 'Yes'],
+    ['Sunny', 'Mild', 'High', 'Weak', 'No'],
+    ['Sunny', 'Cool', 'Normal', 'Weak', 'Yes'],
+    ['Rain', 'Mild', 'Normal', 'Weak', 'Yes'],
+    ['Sunny', 'Mild', 'Normal', 'Strong', 'Yes'],
+    ['Overcast', 'Mild', 'High', 'Strong', 'Yes'],
+    ['Overcast', 'Hot', 'Normal', 'Weak', 'Yes'],
+    ['Rain', 'Mild', 'High', 'Strong', 'No']
+], columns=['Outlook', 'Temperature', 'Humidity', 'Wind', 'PlayTennis'])
+
+def entropy(target_col):
+    counts = Counter(target_col)
+    total = len(target_col)
+    return -sum((count / total) * math.log2(count / total) for count in counts.values())
+
+def info_gain(data, split_attribute, target_name):
+    total_entropy = entropy(data[target_name])
+    values = data[split_attribute].unique()
+    weighted_entropy = sum(
+        (len(subset := data[data[split_attribute] == val]) / len(data)) * entropy(subset[target_name])
+        for val in values
+    )
+    return total_entropy - weighted_entropy
+
+def id3(data, features, target):
+    if len(set(data[target])) == 1:
+        return data[target].iloc[0]
+    if not features:
+        return data[target].mode()[0]
+
+    best_feature = max(features, key=lambda f: info_gain(data, f, target))
+    tree = {best_feature: {}}
+    features = [f for f in features if f != best_feature]
+
+    for value in data[best_feature].unique():
+        subset = data[data[best_feature] == value]
+        tree[best_feature][value] = id3(subset, features, target)
+
+    return tree
+
+features = list(data.columns[:-1])
+decision_tree = id3(data, features, 'PlayTennis')
+
+def classify(tree, sample):
+    if not isinstance(tree, dict):
+        return tree
+    root = next(iter(tree))
+    if sample[root] in tree[root]:
+        return classify(tree[root][sample[root]], sample)
+    else:
+        return 'Unknown'
+
+import pprint
+print("\nDecision Tree:")
+pprint.pprint(decision_tree)
+
+sample = {'Outlook': 'Sunny', 'Temperature': 'Cool', 'Humidity': 'High', 'Wind': 'Strong'}
+print("\nNew Sample Classification:", classify(decision_tree, sample))
+
+
+
+
+
+ Experiment-8 
+Objective: To understand how Find-S and Candidate 
+Elimination algorithms search through the hypothesis space in 
+concept learning tasks, and to observe the role of inductive bias 
+in shaping the learned concept. 
+Source Code: 
+import numpy as np 
+import pandas as pd 
+
+# Sample dataset for concept learning 
+data = np.array([ 
+    ['Sunny', 'Warm', 'Normal', 'Strong', 'Warm', 'Same', 'Yes'], 
+    ['Sunny', 'Warm', 'High', 'Strong', 'Warm', 'Same', 'Yes'], 
+    ['Rainy', 'Cold', 'High', 'Strong', 'Warm', 'Change', 'No'], 
+    ['Sunny', 'Warm', 'High', 'Strong', 'Cool', 'Change', 'Yes'] 
+]) 
+
+# Convert to Pandas DataFrame 
+columns = ['Sky', 'Temperature', 'Humidity', 'Wind', 'Water', 'Forecast', 'EnjoySport'] 
+df = pd.DataFrame(data, columns=columns) 
+
+# Separate features and target 
+X = df.iloc[:, :-1].values 
+Y = df.iloc[:, -1].values
+
+# ------------------- FIND-S ALGORITHM ------------------- 
+def find_s(X, Y): 
+    hypothesis = np.array(X[0])  # Start with the first positive example 
+    for i, sample in enumerate(X): 
+        if Y[i] == 'Yes':  # Only consider positive examples 
+            for j in range(len(sample)): 
+                if sample[j] != hypothesis[j]:   
+                    hypothesis[j] = '?'  # Generalize differing attributes 
+    return hypothesis 
+
+# ------------------- CANDIDATE ELIMINATION ALGORITHM ------------------- 
+def candidate_elimination(X, Y): 
+    num_attributes = X.shape[1] 
+     
+    # Initialize the most specific and most general hypotheses 
+    S = ['Ø'] * num_attributes  # Most specific hypothesis 
+    G = ['?'] * num_attributes  # Most general hypothesis 
+     
+    version_space = []  # Store hypotheses during training 
+
+    for i, sample in enumerate(X): 
+        if Y[i] == 'Yes':  # Positive example 
+            for j in range(num_attributes): 
+                if S[j] == 'Ø':   
+                    S[j] = sample[j]  # Assign first positive sample 
+                elif S[j] != sample[j]:   
+                    S[j] = '?'  # Generalize 
+            version_space.append(tuple(S.copy()))  # Track the version space
+
+        elif Y[i] == 'No':  # Negative example 
+            for j in range(num_attributes): 
+                if S[j] != '?' and S[j] != sample[j]:   
+                    G[j] = S[j]  # Specialize 
+            version_space.append(tuple(G.copy())) 
+
+    return S, G, version_space 
+
+# Run Find-S Algorithm 
+find_s_hypothesis = find_s(X, Y) 
+print("\nFinal Hypothesis (Find-S):", find_s_hypothesis) 
+
+# Run Candidate Elimination Algorithm 
+S_final, G_final, version_space = candidate_elimination(X, Y) 
+print("\nFinal Specific Hypothesis (S):", S_final) 
+print("Final General Hypothesis (G):", G_final) 
+print("Version Space:", version_space)
+
+
+
+
+
+
+
+Experiment-10 
+Objective: To perform binary and multiclass classification on 
+the MNIST dataset, analyze performance metrics, and perform 
+error analysis. 
+Source Code: 
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from tensorflow.keras.datasets import mnist
+
+# Load MNIST dataset
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+
+# Normalize pixel values
+X_train = X_train / 255.0
+X_test = X_test / 255.0
+
+# Flatten 28x28 images to 784-dimensional vectors
+X_train_flat = X_train.reshape(X_train.shape[0], -1)
+X_test_flat = X_test.reshape(X_test.shape[0], -1)
+
+print("Dataset Shape:", X_train.shape, X_test.shape)
+
+# ------------------- Binary Classification (0 vs. others) -------------------
+y_train_binary = (y_train == 0).astype(int)
+y_test_binary = (y_test == 0).astype(int)
+
+# Train binary logistic regression
+binary_clf = LogisticRegression(max_iter=1000)
+binary_clf.fit(X_train_flat, y_train_binary)
+
+# Predict and evaluate
+y_pred_binary = binary_clf.predict(X_test_flat)
+print("\n--- Binary Classification (0 vs. Others) ---")
+print("Accuracy:", accuracy_score(y_test_binary, y_pred_binary))
+print(classification_report(y_test_binary, y_pred_binary))
+
+# ------------------- Multiclass Classification -------------------
+multi_clf = LogisticRegression(max_iter=1000, multi_class="multinomial", solver="lbfgs")
+multi_clf.fit(X_train_flat, y_train)
+
+y_pred_multi = multi_clf.predict(X_test_flat)
+
+print("\n--- Multiclass Classification (All Digits) ---")
+print("Accuracy:", accuracy_score(y_test, y_pred_multi))
+print(classification_report(y_test, y_pred_multi))
+
+# ------------------- Confusion Matrix -------------------
+conf_matrix = confusion_matrix(y_test, y_pred_multi)
+plt.figure(figsize=(10, 7))
+sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="coolwarm",
+            xticklabels=range(10), yticklabels=range(10))
+plt.xlabel("Predicted Label")
+plt.ylabel("True Label")
+plt.title("Confusion Matrix (Multiclass)")
+plt.show()
+
+# ------------------- Misclassified Examples -------------------
+misclassified_idxs = np.where(y_test != y_pred_multi)[0]
+plt.figure(figsize=(12, 6))
+for i, idx in enumerate(misclassified_idxs[:10]):
+    plt.subplot(2, 5, i + 1)
+    plt.imshow(X_test[idx], cmap="gray")
+    plt.title(f"True: {y_test[idx]}, Pred: {y_pred_multi[idx]}")
+    plt.axis("off")
+plt.tight_layout()
+plt.show()
